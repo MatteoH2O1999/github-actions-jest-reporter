@@ -1,0 +1,28 @@
+name: Tests
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x, 19.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}
+    name: Test node ${{ matrix.node-version }} on ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup node ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install production and development dependencies
+        run: npm ci --include=dev
+      - name: Run Tests
+        run: npm run test
