@@ -1,3 +1,6 @@
 .gitattributes
 test_repo
 tests
+.github
+jest.config.js
+.babelrc
