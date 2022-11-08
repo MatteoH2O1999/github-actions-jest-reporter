@@ -14,6 +14,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
     }
     
     onRunComplete(testContexts, results) {
+        this.__printFailedTestLogs(testContexts, results);
         this.__printSummary(results);
         console.log('Ran all test suites.');
     }
@@ -144,7 +145,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
             });
             core.endGroup();
         } else {
-            console.log('FAIL ' + resultTree.name);
+            console.log('  FAIL ' + resultTree.name);
             resultTree.children.forEach(child => {
                 this.__recursivePrintResultTree(child, false, 1);
             });
@@ -153,7 +154,11 @@ class GithubActionsReporter extends reporters.BaseReporter {
 
     __recursivePrintResultTree(resultTree, alreadyGrouped, depth) {
         if (resultTree.children.length === 0) {
-            const spaces = '  '.repeat(depth);
+            let numberSpaces = depth;
+            if (!alreadyGrouped) {
+                numberSpaces++;
+            }
+            const spaces = '  '.repeat(numberSpaces);
             let resultSymbol;
             if (resultTree.passed) {
                 resultSymbol = '\u2713';
@@ -176,12 +181,15 @@ class GithubActionsReporter extends reporters.BaseReporter {
                     core.endGroup();
                 }
             } else {
-                console.log('  '.repeat(depth) + resultTree.name);
+                console.log('  '.repeat(depth + 1) + resultTree.name);
                 resultTree.children.forEach(child => {
                     this.__recursivePrintResultTree(child, false, depth + 1);
                 });
             }
         }
+    }
+
+    __printFailedTestLogs(context, testResults) {
     }
 
     __printSummary(results) {
