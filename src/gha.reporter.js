@@ -9,13 +9,33 @@ class GithubActionsReporter extends reporters.BaseReporter {
         this._context = reporterContext;
     }
 
-    onTestResult(test, testResult, results) {
+    async onTestResult(test, testResult, results) {
         this.__printFullResult(test.context, testResult);
+        if (this.__isLastTestSuite(results)) {
+            console.log('');
+            if (this.__printFailedTestLogs(test, results)) {
+                console.log('');
+            }
+        }
+    }
+
+    __isLastTestSuite(results) {
+        const passedTestSuites = results.numPassedTestSuites;
+        const failedTestSuites = results.numFailedTestSuites;
+        const totalTestSuites = results.numTotalTestSuites;
+        const computedTotal =  passedTestSuites + failedTestSuites;
+        if (computedTotal < totalTestSuites) {
+            return false;
+        } else if (computedTotal === totalTestSuites) {
+            return true;
+        } else {
+            throw "Sum(" + computedTotal + ") of passed (" + passedTestSuites + ") and failed (" + failedTestSuites + ") test suites is greater than the total number of test suites (" + totalTestSuites + "). Please report the bug at https://github.com/MatteoH2O1999/github-actions-jest-reporter/issues";
+        }
     }
     
     onRunComplete(testContexts, results) {
-        this.__printFailedTestLogs(testContexts, results);
-        this.__printSummary(results);
+        console.log('');
+        console.log(reporters.utils.getSummary(results));
         console.log('Ran all test suites.');
     }
 
@@ -190,15 +210,21 @@ class GithubActionsReporter extends reporters.BaseReporter {
     }
 
     __printFailedTestLogs(context, testResults) {
-    }
-
-    __printSummary(results) {
-        // TODO: this sucks, find better way to align
-        console.log('');
-        console.log("Test Suites: %d passed, %d total", results.numPassedTestSuites, results.numTotalTestSuites);
-        console.log("Tests:       %d passed, %d total", results.numPassedTests, results.numTotalTests);
-        console.log("Snapshots:   %d total", results.snapshot.total);
-        console.log("Time:        %f s", (Date.now() - results.startTime) / 1000);
+        const rootDir = context.context.config.rootDir;
+        const results = testResults.testResults;
+        let written = false;
+        results.forEach(result => {
+            let testDir = result.testFilePath;
+            testDir = testDir.replace(rootDir, '');
+            testDir = testDir.slice(1, testDir.length);
+            if (result.failureMessage) {
+                written = true;
+                core.startGroup("Errors thrown in " + testDir);
+                console.log(result.failureMessage);
+                core.endGroup();
+            }
+        });
+        return written;
     }
 }
 
