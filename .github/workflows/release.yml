@@ -40,7 +40,7 @@ jobs:
           cache: 'npm'
           registry-url: https://registry.npmjs.org/
       - name: Install production dependencies
-        run: npm ci --ompit=dev
+        run: npm ci --omit=dev
       - name: Publish package to npm
         run: npm publish
         env:
