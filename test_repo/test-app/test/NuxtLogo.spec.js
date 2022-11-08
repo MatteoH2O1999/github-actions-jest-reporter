@@ -1,6 +1,10 @@
 import { mount } from '@vue/test-utils'
 import NuxtLogo from '@/components/NuxtLogo.vue'
 
+test('external test', () => {
+  expect(true).toBeTruthy();
+})
+
 describe('NuxtLogo', () => {
   test('is a Vue instance', () => {
     const wrapper = mount(NuxtLogo)

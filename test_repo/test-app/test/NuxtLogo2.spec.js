@@ -1,6 +1,10 @@
 import { mount } from '@vue/test-utils'
 import NuxtLogo from '@/components/NuxtLogo.vue'
 
+test('fail', () => {
+  throw "fail";
+})
+
 describe('NuxtLogo', () => {
   test('is a Vue instance', () => {
     const wrapper = mount(NuxtLogo)
@@ -9,7 +13,7 @@ describe('NuxtLogo', () => {
   
   test('is not a Vue instance', () => {
     const wrapper = mount(NuxtLogo)
-    expect(wrapper.vm).toBeFalsy()
+    expect(false).toBeFalsy()
   })
 
   describe('NuxtLogo2', () => {
@@ -20,7 +24,7 @@ describe('NuxtLogo', () => {
     
     test('is not a Vue instance', () => {
       const wrapper = mount(NuxtLogo)
-      expect(wrapper.vm).toBeFalsy()
+      expect(false).toBeFalsy()
     })
   })
 })

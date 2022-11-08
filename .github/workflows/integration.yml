@@ -26,6 +26,9 @@ jobs:
           npm ci --include=dev
       - name: Install dependencies
         run: npm ci --include=dev
-      - name: Run integration test
-        run: npm run integration
+      - name: Run integration test jest default reporter
+        run: npm run integration-base
+        continue-on-error: true
+      - name: Run integration test jest new reporter
+        run: npm run integration-new
         continue-on-error: true
