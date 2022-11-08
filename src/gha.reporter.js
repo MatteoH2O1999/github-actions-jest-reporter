@@ -8,25 +8,22 @@ class GithubActionsReporter extends reporters.BaseReporter {
         this._options = reporterOptions;
         this._context = reporterContext;
     }
+
+    onTestResult(test, testResult, results) {
+        this.__printFullResult(test.context, testResult);
+    }
     
     onRunComplete(testContexts, results) {
-        this.__printFullResult(testContexts, results);
         this.__printSummary(results);
         console.log('Ran all test suites.');
     }
 
     __printFullResult(context, results) {
-        const rootDir = context.values().next().value.config.rootDir;
-        const testSuites = results.testResults;
-        testSuites.forEach(element => {
-            let testDir = element.testFilePath.replace(rootDir, '');
-            testDir = testDir.slice(1, testDir.length);
-            const resultTree = this.__getResultTree(element.testResults, testDir);
-            this.__printResultTree(resultTree);
-            //const r = require('util')
-            //console.log(r.inspect(resultTree, true, null, true));
-            //console.log('---------------------------------------------------------------------\n--------------------------------------------------------\n-------------------------------------------')
-        })
+        const rootDir = context.config.rootDir;
+        let testDir = results.testFilePath.replace(rootDir, '');
+        testDir = testDir.slice(1, testDir.length);
+        const resultTree = this.__getResultTree(results.testResults, testDir);
+        this.__printResultTree(resultTree);
     }
 
     __arrayEqual(a1, a2) {
