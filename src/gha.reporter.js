@@ -23,15 +23,125 @@ class GithubActionsReporter extends reporters.BaseReporter {
             testDir = testDir.slice(1, testDir.length);
             const resultTree = this.__getResultTree(element.testResults, testDir);
             this.__printResultTree(resultTree);
+            //const r = require('util')
+            //console.log(r.inspect(resultTree, true, null, true));
+            //console.log('---------------------------------------------------------------------\n--------------------------------------------------------\n-------------------------------------------')
         })
     }
 
+    __arrayEqual(a1, a2) {
+        if (a1.length !== a2.length) {
+            return false;
+        }
+        for (let index = 0; index < a1.length; index++) {
+            const element = a1[index];
+            if (element !== a2[index]) {
+               return false; 
+            }
+        }
+        return true;
+    }
+
+    __arrayChild(a1, a2) {
+        if (a1.length - a2.length !== 1) {
+            return false;
+        }
+        for (let index = 0; index < a2.length; index++) {
+            const element = a2[index];
+            if (element !== a1[index]) {
+                return false
+            }
+        }
+        return true;
+    }
+
     __getResultTree(suiteResult, testPath) {
+        let root = {
+            name: testPath,
+            passed: true,
+            children: []
+        };
+        let branches = [];
+        suiteResult.forEach(element => {
+            if (element.ancestorTitles.length === 0) {
+                let passed = true;
+                if (element.status === 'failed') {
+                    root.passed = false;
+                    passed = false;
+                };
+                root.children.push({
+                    name: element.title,
+                    passed: passed,
+                    children: []
+                });
+            } else if (element.ancestorTitles.length === 1) {
+                let alreadyInserted = false;
+                for (let index = 0; index < branches.length; index++) {
+                    if (this.__arrayEqual(branches[index], element.ancestorTitles)) {
+                        alreadyInserted = true;
+                        break;
+                    }
+                }
+                if (!alreadyInserted) {
+                    branches.push(element.ancestorTitles);
+                }
+            }
+        });
+        branches.forEach(element => {
+            const newChild = this.__getResultChildren(suiteResult, element);
+            if (!newChild.passed) {
+                root.passed = false;
+            }
+            root.children.push(newChild);
+        });
+        return root;
+    }
+
+    __getResultChildren(suiteResult, ancestors) {
+        let node = {
+            name: ancestors.at(-1),
+            passed: true,
+            children: []
+        };
+        let branches = [];
+        suiteResult.forEach(element => {
+            let passed = true;
+            if (this.__arrayEqual(element.ancestorTitles, ancestors)) {
+                if (element.status === 'failed') {
+                    node.passed = false;
+                    passed = false;
+                }
+                node.children.push({
+                    name: element.title,
+                    passed: passed,
+                    children: []
+                });
+            } else if (this.__arrayChild(element.ancestorTitles, ancestors)) {
+                let alreadyInserted = false;
+                for (let index = 0; index < branches.length; index++) {
+                    if (this.__arrayEqual(branches[index], element.ancestorTitles)) {
+                        alreadyInserted = true;
+                        break;
+                    }
+                }
+                if (!alreadyInserted) {
+                    branches.push(element.ancestorTitles);
+                }
+            }
+        });
+        branches.forEach(element => {
+            const newChild = this.__getResultChildren(suiteResult, element);
+            if (!newChild.passed) {
+                node.passed = false;
+            }
+            node.children.push(newChild);
+        });
+        return node;
     }
 
     __printResultTree(resultTree) {
         if (resultTree.passed) {
-            core.group('PASS ' + resultTree.name);
+            core.startGroup('PASS ' + resultTree.name);
             resultTree.children.forEach(child => {
                 this.__recursivePrintResultTree(child, true, 1);
             });
@@ -45,7 +155,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
     }
 
     __recursivePrintResultTree(resultTree, alreadyGrouped, depth) {
-        if (resultTree.children.length == 0) {
+        if (resultTree.children.length === 0) {
             const spaces = '  '.repeat(depth);
             let resultSymbol;
             if (resultTree.passed) {
@@ -57,17 +167,19 @@ class GithubActionsReporter extends reporters.BaseReporter {
         } else {
             if (resultTree.passed) {
                 if (alreadyGrouped) {
+                    console.log('  '.repeat(depth) + resultTree.name);
                     resultTree.children.forEach(child => {
                         this.__recursivePrintResultTree(child, true, depth + 1);
                     });
                 } else {
-                    core.group(resultTree.name);
+                    core.startGroup('  '.repeat(depth) + resultTree.name);
                     resultTree.children.forEach(child => {
                         this.__recursivePrintResultTree(child, true, depth + 1);
                     });
                     core.endGroup();
                 }
             } else {
+                console.log('  '.repeat(depth) + resultTree.name);
                 resultTree.children.forEach(child => {
                     this.__recursivePrintResultTree(child, false, depth + 1);
                 });
