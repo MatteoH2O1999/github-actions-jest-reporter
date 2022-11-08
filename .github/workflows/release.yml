@@ -1,12 +1,9 @@
-name: Tests
+name: Release
 
 on:
   push:
-    branches:
-      - "master"
-    tags-ignore:
+    tags:
       - "**"
-  pull_request:
 
 jobs:
   test:
@@ -29,20 +26,22 @@ jobs:
         run: npm ci --include=dev
       - name: Run Tests
         run: npm run test
-  codeql:
-    needs: test
+  build_and_release:
     runs-on: ubuntu-latest
-    name: CodeQL Analysis
+    needs: test
+    name: Build and release
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Remove internal test repo
-        run: rm -rf test_repo
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+      - name: Setup node
+        uses: actions/setup-node@v3
         with:
-          languages: javascript
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v2
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+          node-version: '16.x'
+          cache: 'npm'
+          registry-url: https://registry.npmjs.org/
+      - name: Install production dependencies
+        run: npm ci --ompit=dev
+      - name: Publish package to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
