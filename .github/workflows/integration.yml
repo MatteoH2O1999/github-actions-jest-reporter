@@ -29,6 +29,10 @@ jobs:
       - name: Run integration test with default reporter
         run: npm run integration-base
         continue-on-error: true
+        env:
+          FORCE_COLOR: 3
       - name: Run integration test with new reporter
         run: npm run integration-new
         continue-on-error: true
+        env:
+          FORCE_COLOR: 3
