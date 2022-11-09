@@ -92,16 +92,16 @@ class GithubActionsReporter extends reporters.BaseReporter {
                     passed: passed,
                     children: []
                 });
-            } else if (element.ancestorTitles.length === 1) {
+            } else {
                 let alreadyInserted = false;
                 for (let index = 0; index < branches.length; index++) {
-                    if (this.__arrayEqual(branches[index], element.ancestorTitles)) {
+                    if (this.__arrayEqual(branches[index], element.ancestorTitles.slice(0, 1))) {
                         alreadyInserted = true;
                         break;
                     }
                 }
                 if (!alreadyInserted) {
-                    branches.push(element.ancestorTitles);
+                    branches.push(element.ancestorTitles.slice(0, 1));
                 }
             }
         });
@@ -134,16 +134,16 @@ class GithubActionsReporter extends reporters.BaseReporter {
                     passed: passed,
                     children: []
                 });
-            } else if (this.__arrayChild(element.ancestorTitles, ancestors)) {
+            } else if (this.__arrayChild(element.ancestorTitles.slice(0, ancestors.length + 1), ancestors)) {
                 let alreadyInserted = false;
                 for (let index = 0; index < branches.length; index++) {
-                    if (this.__arrayEqual(branches[index], element.ancestorTitles)) {
+                    if (this.__arrayEqual(branches[index], element.ancestorTitles.slice(0, ancestors.length + 1))) {
                         alreadyInserted = true;
                         break;
                     }
                 }
                 if (!alreadyInserted) {
-                    branches.push(element.ancestorTitles);
+                    branches.push(element.ancestorTitles.slice(0, ancestors.length + 1));
                 }
             }
         });
