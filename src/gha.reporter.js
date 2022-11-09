@@ -90,6 +90,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
                 root.children.push({
                     name: element.title,
                     passed: passed,
+                    duration: Math.max(element.duration, 1),
                     children: []
                 });
             } else {
@@ -132,6 +133,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
                 node.children.push({
                     name: element.title,
                     passed: passed,
+                    duration: Math.max(element.duration, 1),
                     children: []
                 });
             } else if (this.__arrayChild(element.ancestorTitles.slice(0, ancestors.length + 1), ancestors)) {
@@ -185,7 +187,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
             } else {
                 resultSymbol = '\u00D7';
             }
-            console.log(spaces + resultSymbol + ' ' + resultTree.name);
+            console.log(spaces + resultSymbol + ' ' + resultTree.name + ' (' + resultTree.duration + ' ms)');
         } else {
             if (resultTree.passed) {
                 if (alreadyGrouped) {
