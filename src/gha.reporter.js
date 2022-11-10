@@ -1,5 +1,6 @@
 const reporters = require('@jest/reporters');
 const core = require('@actions/core');
+const chalk = require('chalk');
 
 class GithubActionsReporter extends reporters.BaseReporter {
     constructor(globalConfig, reporterOptions, reporterContext) {
@@ -43,7 +44,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
         const rootDir = context.config.rootDir;
         let testDir = results.testFilePath.replace(rootDir, '');
         testDir = testDir.slice(1, testDir.length);
-        const resultTree = this.__getResultTree(results.testResults, testDir);
+        const resultTree = this.__getResultTree(results.testResults, testDir, results.perfStats);
         this.__printResultTree(resultTree);
     }
 
@@ -73,10 +74,11 @@ class GithubActionsReporter extends reporters.BaseReporter {
         return true;
     }
 
-    __getResultTree(suiteResult, testPath) {
+    __getResultTree(suiteResult, testPath, suitePerf) {
         let root = {
             name: testPath,
             passed: true,
+            performanceInfo: suitePerf,
             children: []
         };
         let branches = [];
@@ -160,14 +162,20 @@ class GithubActionsReporter extends reporters.BaseReporter {
     }
 
     __printResultTree(resultTree) {
+        let perfMs;
+        if (resultTree.performanceInfo.slow) {
+            perfMs = ' (' + chalk.red.inverse(resultTree.performanceInfo.runtime + ' ms') + ')';
+        } else {
+            perfMs = ' (' + resultTree.performanceInfo.runtime + ' ms' + ')';
+        }
         if (resultTree.passed) {
-            core.startGroup('PASS ' + resultTree.name);
+            core.startGroup(chalk.bold.green.inverse('PASS') + ' ' + resultTree.name + perfMs);
             resultTree.children.forEach(child => {
                 this.__recursivePrintResultTree(child, true, 1);
             });
             core.endGroup();
         } else {
-            console.log('  FAIL ' + resultTree.name);
+            console.log('  ' + chalk.bold.red.inverse('FAIL') + ' ' + resultTree.name + perfMs);
             resultTree.children.forEach(child => {
                 this.__recursivePrintResultTree(child, false, 1);
             });
@@ -183,9 +191,9 @@ class GithubActionsReporter extends reporters.BaseReporter {
             const spaces = '  '.repeat(numberSpaces);
             let resultSymbol;
             if (resultTree.passed) {
-                resultSymbol = '\u2713';
+                resultSymbol = chalk.green('\u2713');
             } else {
-                resultSymbol = '\u00D7';
+                resultSymbol = chalk.red('\u00D7');
             }
             console.log(spaces + resultSymbol + ' ' + resultTree.name + ' (' + resultTree.duration + ' ms)');
         } else {
