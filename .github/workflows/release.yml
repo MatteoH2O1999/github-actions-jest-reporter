@@ -26,6 +26,8 @@ jobs:
         run: npm ci --include=dev
       - name: Run Tests
         run: npm run test
+        env:
+          FORCE_COLOR: 3
   build_and_release:
     runs-on: ubuntu-latest
     needs: test

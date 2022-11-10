@@ -29,6 +29,8 @@ jobs:
         run: npm ci --include=dev
       - name: Run Tests
         run: npm run test
+        env:
+          FORCE_COLOR: 3
   codeql:
     needs: test
     runs-on: ubuntu-latest
