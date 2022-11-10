@@ -10,7 +10,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
         this._context = reporterContext;
     }
 
-    async onTestResult(test, testResult, results) {
+    onTestResult(test, testResult, results) {
         this.__printFullResult(test.context, testResult);
         if (this.__isLastTestSuite(results)) {
             console.log('');
