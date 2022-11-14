@@ -22,7 +22,7 @@ The package depends on `jest` (obviously), `chalk` and the `@actions/core` packa
 The reporter can be installed directly from npm:
 
 ```
-npm install @matteoh2o1999/github-actions-jest-reporter
+npm install --save-dev @matteoh2o1999/github-actions-jest-reporter
 ```
 
 ## Usage
