@@ -61,8 +61,8 @@ Add the reporter to the `reporters` array in your configuration file:
 ```diff
 module.exports: {
     ...
--   reporters: ['default'],
-+   reporters: ['default', '@matteoh2o1999/github-actions-jest-reporter'],
+-   reporters: [...],
++   reporters: [..., '@matteoh2o1999/github-actions-jest-reporter'],
 }
 ```
 
