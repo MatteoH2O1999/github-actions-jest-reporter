@@ -2,7 +2,7 @@
 
 A fast and easy way of navigating through the logs produced by Jest in the Github Actions UI.
 
-Image
+![reporter demo](./demos/demo.gif)
 
 ## Motivation
 
@@ -11,7 +11,7 @@ While this is useful in a local development environment, it becomes cumbersome t
 The aim of this reporter is to log all the results (including passed tests), but folding them neatly as groups leveraging Github Actions builtin group function.
 Logs of failures are grouped and folded by test file so they can be opened and read in a more organized way.
 
-Error image
+![reporter error log demo](./demos/error_log_demo.gif)
 
 ## Dependencies
 
