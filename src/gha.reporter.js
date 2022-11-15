@@ -2,6 +2,11 @@ const reporters = require('@jest/reporters');
 const core = require('@actions/core');
 const chalk = require('chalk');
 
+if (chalk.level === 0) {
+    chalk.level = 3;
+    process.env['FORCE_COLOR'] = 3;
+}
+
 class GithubActionsReporter extends reporters.BaseReporter {
     constructor(globalConfig, reporterOptions, reporterContext) {
         super();
