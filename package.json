@@ -6,6 +6,7 @@
   "engines": {
     "node": ">=14.0.0"
   },
+  "keywords": ["jest", "reporter", "github", "actions", "gha", "github actions"],
   "scripts": {
     "test": "jest",
     "integration-base": "cd test_repo && cd test-app && npm run test",
