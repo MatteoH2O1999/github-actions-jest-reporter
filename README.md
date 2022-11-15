@@ -31,7 +31,7 @@ The package depends on `jest` (obviously), `chalk` and the `@actions/core` packa
 
 The reporter can be installed directly from npm:
 
-```
+```bash
 npm install --save-dev @matteoh2o1999/github-actions-jest-reporter
 ```
 
@@ -42,6 +42,7 @@ There are two ways to use the reporter in your Jest testing.
 ### Create CI test script (recommended)
 
 In your `package.json` just add a line in your script section:
+
 ```diff
 {
     ...
@@ -57,11 +58,11 @@ Then in your `test.yml` use the new script instead of the old one:
 
 ```diff
 steps:
-    - name: Checkout code
-    ...
-    - name: Run tests
--     run: npm run test
-+     run: npm run test-ci
+  - name: Checkout code
+  ...
+  - name: Run tests
+-   run: npm run test
++   run: npm run test-ci
 ```
 
 ### Add as reporter in `jest.config`
@@ -77,3 +78,21 @@ module.exports: {
 ```
 
 > :warning: **Warning:** adding this reporter in your `jest.config` file will also impact local testing.
+
+## Troubleshooting
+
+### My logs are not colored
+
+This is a known problem related to `chalk` not recognizing Github Actions terminal as capable of writing colors.
+
+Until this is fixed on their end a workaround is to force color output with an environment variable:
+
+```diff
+steps:
+  - name: Checkout code
+  ...
+  - name: Run tests
+    run: npm run test-ci
++   env:
++     FORCE_COLOR: 1
+```
