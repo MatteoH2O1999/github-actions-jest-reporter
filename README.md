@@ -1,7 +1,6 @@
 # Github Actions Jest reporter
 
 [![Tests](https://github.com/MatteoH2O1999/github-actions-jest-reporter/actions/workflows/test.yml/badge.svg)](https://github.com/MatteoH2O1999/github-actions-jest-reporter/actions/workflows/test.yml)
-[![Release](https://github.com/MatteoH2O1999/github-actions-jest-reporter/actions/workflows/release.yml/badge.svg)](https://github.com/MatteoH2O1999/github-actions-jest-reporter/actions/workflows/release.yml)
 ![Downloads](https://img.shields.io/npm/dw/@matteoh2o1999/github-actions-jest-reporter)
 ![License](https://img.shields.io/npm/l/@matteoh2o1999/github-actions-jest-reporter)
 [![Version](https://img.shields.io/npm/v/@matteoh2o1999/github-actions-jest-reporter)](https://www.npmjs.com/package/@matteoh2o1999/github-actions-jest-reporter)
