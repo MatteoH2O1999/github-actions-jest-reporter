@@ -4,7 +4,7 @@
 [![Release](https://github.com/MatteoH2O1999/github-actions-jest-reporter/actions/workflows/release.yml/badge.svg)](https://github.com/MatteoH2O1999/github-actions-jest-reporter/actions/workflows/release.yml)
 ![Downloads](https://img.shields.io/npm/dw/@matteoh2o1999/github-actions-jest-reporter)
 ![License](https://img.shields.io/npm/l/@matteoh2o1999/github-actions-jest-reporter)
-![Version](https://img.shields.io/npm/v/@matteoh2o1999/github-actions-jest-reporter)
+[![Version](https://img.shields.io/npm/v/@matteoh2o1999/github-actions-jest-reporter)](https://www.npmjs.com/package/@matteoh2o1999/github-actions-jest-reporter)
 ![Node](https://img.shields.io/node/v/@matteoh2o1999/github-actions-jest-reporter)
 ![Dependent Packages](https://img.shields.io/librariesio/dependents/npm/@matteoh2o1999/github-actions-jest-reporter)
 ![Dependent Repositories](https://img.shields.io/librariesio/dependent-repos/npm/@matteoh2o1999/github-actions-jest-reporter)
