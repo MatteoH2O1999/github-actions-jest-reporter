@@ -8,6 +8,10 @@ const core = require('@actions/core');
 core.startGroup.mockImplementation((groupName) => console.log('::group::' + groupName));
 core.endGroup.mockImplementation(() => {console.log('::endgroup::')});
 
+jest.mock('@jest/reporters');
+const reporters = require('@jest/reporters');
+reporters.utils.getSummary.mockReturnValue('Summary');
+
 const xSymbol = '\u00D7';
 const ySymbol = '\u2713';
 
@@ -113,6 +117,96 @@ describe('Result tree generation', () => {
         expect(consoleLog).toBe('');
         expect(generated).toEqual(expectedResults);
     })
+
+    test('failed single test inside describe', () => {
+        const testResults = [
+            {
+                ancestorTitles: ['Test describe'],
+                title: 'test',
+                status: 'failed',
+                duration: 10
+            }
+        ]
+        const testContext = {
+        };
+        const suitePerf = {
+            runtime: 20,
+            slow: false
+        };
+        const expectedResults = {
+            name: '/',
+            passed: false,
+            performanceInfo: {
+                runtime: 20,
+                slow: false
+            },
+            children: [
+                {
+                    name: 'Test describe',
+                    passed: false,
+                    children: [
+                        {
+                            name: 'test',
+                            passed: false,
+                            duration: 10,
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        };
+        const gha = new GhaReporter();
+
+        const generated = gha.__getResultTree(testResults, '/', suitePerf);
+
+        expect(consoleLog).toBe('');
+        expect(generated).toEqual(expectedResults);
+    })
+
+    test('passed single test inside describe', () => {
+        const testResults = [
+            {
+                ancestorTitles: ['Test describe'],
+                title: 'test',
+                status: 'passed',
+                duration: 10
+            }
+        ]
+        const testContext = {
+        };
+        const suitePerf = {
+            runtime: 20,
+            slow: false
+        };
+        const expectedResults = {
+            name: '/',
+            passed: true,
+            performanceInfo: {
+                runtime: 20,
+                slow: false
+            },
+            children: [
+                {
+                    name: 'Test describe',
+                    passed: true,
+                    children: [
+                        {
+                            name: 'test',
+                            passed: true,
+                            duration: 10,
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        };
+        const gha = new GhaReporter();
+
+        const generated = gha.__getResultTree(testResults, '/', suitePerf);
+
+        expect(consoleLog).toBe('');
+        expect(generated).toEqual(expectedResults);
+    })
 })
 
 describe('Result tree output', () => {
@@ -187,6 +281,81 @@ describe('Result tree output', () => {
 
         expect(consoleLog).toEqual(expectedOutput);
     })
+
+    test('failed single test inside describe', () => {
+        const generatedTree = {
+            name: '/',
+            passed: false,
+            performanceInfo: {
+                runtime: 20,
+                slow: false
+            },
+            children: [
+                {
+                    name: 'Test describe',
+                    passed: false,
+                    children: [
+                        {
+                            name: 'test',
+                            passed: false,
+                            duration: 10,
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        };
+        const testContext = {
+        };
+        const expectedOutput = (
+            '  ' + chalk.bold.red.inverse('FAIL') + ' / (20 ms)\n' +
+            '    Test describe\n' + 
+            '      ' + chalk.red(xSymbol) + ' test (10 ms)\n'
+            );
+        const gha = new GhaReporter();
+
+        gha.__printResultTree(generatedTree);
+
+        expect(consoleLog).toEqual(expectedOutput);
+    })
+
+    test('passed single test inside describe', () => {
+        const generatedTree = {
+            name: '/',
+            passed: true,
+            performanceInfo: {
+                runtime: 20,
+                slow: false
+            },
+            children: [
+                {
+                    name: 'Test describe',
+                    passed: true,
+                    children: [
+                        {
+                            name: 'test',
+                            passed: true,
+                            duration: 10,
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        };
+        const testContext = {
+        };
+        const expectedOutput = (
+            '::group::' + chalk.bold.green.inverse('PASS') + ' / (20 ms)\n' +
+            '  Test describe\n' + 
+            '    ' + chalk.green(ySymbol) + ' test (10 ms)\n' +
+            '::endgroup::\n'
+        );
+        const gha = new GhaReporter();
+
+        gha.__printResultTree(generatedTree);
+
+        expect(consoleLog).toEqual(expectedOutput);
+    })
 })
 
 describe('Reporter interface', () => {
@@ -209,8 +378,106 @@ describe('Reporter interface', () => {
     })
 
     test('onRunComplete', () => {
+        const mockResults = {};
+        const mockContext = {};
+        const expectedOutput = (
+            '\n' +
+            'Summary\n' +
+            'Ran all test suites.\n'
+        );
+        const gha = new GhaReporter();
+
+        gha.onRunComplete(mockContext, mockResults);
+
+        expect(consoleLog).toEqual(expectedOutput);
     })
 
-    test('onTestResult', () => {
+    test('onTestResult not last', () => {
+        const mockTest = {
+            context: {
+                config: {
+                    rootDir: '/testDir'
+                }
+            }
+        };
+        const mockTestResult = {
+            testFilePath: '/testDir/test1.js',
+            testResults: [
+                {
+                    ancestorTitles: [],
+                    title: 'test1',
+                    status: 'passed',
+                    duration: 10
+                }
+            ],
+            perfStats: {
+                slow: false,
+                runtime: 20
+            }
+        };
+        const mockResults = {
+            numPassedTestSuites: 1,
+            numFailedTestSuites: 1,
+            numTotalTestSuites: 3
+        };
+        const expectedOutput = (
+            '::group::' + chalk.bold.green.inverse('PASS') + ' test1.js (20 ms)\n' +
+            '  ' + chalk.green(ySymbol) + ' test1 (10 ms)\n' +
+            '::endgroup::\n'
+        );
+        const gha = new GhaReporter();
+
+        gha.onTestResult(mockTest, mockTestResult, mockResults);
+
+        expect(consoleLog).toEqual(expectedOutput);
+    })
+
+    test('onTestResult last', () => {
+        const mockTest = {
+            context: {
+                config: {
+                    rootDir: '/testDir'
+                }
+            }
+        };
+        const mockTestResult = {
+            testFilePath: '/testDir/test1.js',
+            testResults: [
+                {
+                    ancestorTitles: [],
+                    title: 'test1',
+                    status: 'passed',
+                    duration: 10
+                }
+            ],
+            perfStats: {
+                slow: false,
+                runtime: 20
+            },
+            failureMessage: 'Failure message'
+        };
+        const mockResults = {
+            numPassedTestSuites: 2,
+            numFailedTestSuites: 1,
+            numTotalTestSuites: 3,
+            testResults: [
+                mockTestResult
+            ]
+        };
+        const expectedOutput = (
+            '::group::' + chalk.bold.green.inverse('PASS') + ' test1.js (20 ms)\n' +
+            '  ' + chalk.green(ySymbol) + ' test1 (10 ms)\n' +
+            '::endgroup::\n' + 
+            '\n' +
+            '::group::Errors thrown in test1.js\n' + 
+            'Failure message\n' +
+            '::endgroup::\n' +
+            '\n'
+        );
+        const gha = new GhaReporter();
+
+        gha.onTestResult(mockTest, mockTestResult, mockResults);
+
+        expect(consoleLog).toEqual(expectedOutput);
     })
 })
