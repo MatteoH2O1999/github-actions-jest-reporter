@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "A Github Actions reporter for Jest supporting log folding",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "engines": {
     "node": ">=16.6.0"
   },
@@ -32,6 +33,8 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@jest/reporters": "^29.3.1",
+    "@jest/test-result": "^29.3.1",
+    "@jest/types": "^29.3.1",
     "chalk": "^4.0.0"
   },
   "devDependencies": {
