@@ -88,7 +88,12 @@ class GithubActionsReporter extends reporters.BaseReporter {
                 if (element.status === 'failed') {
                     root.passed = false;
                     passed = false;
-                };
+                } else if (element.status !== 'passed') {
+                    throw "Expected status to be 'failed' or 'passed', got " + element.status;
+                }
+                if (isNaN(element.duration)) {
+                    throw "Expected duration to be a number, got NaN";
+                }
                 root.children.push({
                     name: element.title,
                     passed: passed,
