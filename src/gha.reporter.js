@@ -125,7 +125,7 @@ class GithubActionsReporter extends reporters.BaseReporter {
 
     __getResultChildren(suiteResult, ancestors) {
         let node = {
-            name: ancestors.at(-1),
+            name: ancestors[ancestors.length - 1],
             passed: true,
             children: []
         };
