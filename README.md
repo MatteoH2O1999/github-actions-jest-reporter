@@ -5,9 +5,6 @@
 ![License](https://img.shields.io/npm/l/@matteoh2o1999/github-actions-jest-reporter)
 [![Version](https://img.shields.io/npm/v/@matteoh2o1999/github-actions-jest-reporter)](https://www.npmjs.com/package/@matteoh2o1999/github-actions-jest-reporter)
 ![Node](https://img.shields.io/node/v/@matteoh2o1999/github-actions-jest-reporter)
-![Dependent Packages](https://img.shields.io/librariesio/dependents/npm/@matteoh2o1999/github-actions-jest-reporter)
-![Dependent Repositories](https://img.shields.io/librariesio/dependent-repos/npm/@matteoh2o1999/github-actions-jest-reporter)
-![NPM Score](https://img.shields.io/npms-io/final-score/@matteoh2o1999/github-actions-jest-reporter)
 
 A fast and easy way of navigating through the logs produced by Jest in the Github Actions UI.
 
