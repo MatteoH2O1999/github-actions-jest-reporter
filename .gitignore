@@ -129,3 +129,6 @@ dist
 # Test repo folder
 test_repo/test-app/node_modules
 .vscode
+
+# Compiled Typescript
+lib
