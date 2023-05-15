@@ -20,7 +20,7 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint --ext .ts src/",
-    "build": "tsc --build --verbose",
+    "build": "tsc --build",
     "integration-base": "cd test_repo && cd test-app && npm run test",
     "integration-new": "cd test_repo && cd test-app && npm run test-reporter"
   },

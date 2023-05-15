@@ -1,4 +1,11 @@
 .gitattributes
+.editorconfig
+.eslintignore
+.eslintrc.json
+.prettierignore
+.prettierrc.json
+tsconfig.json
+tsconfig.eslint.json
 test_repo
 tests
 .github

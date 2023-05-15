@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install production and development dependencies
-        run: npm ci --include=dev
+        run: npm ci
       - name: Run Tests
         run: npm run test
         env:
@@ -38,7 +38,7 @@ jobs:
         with:
           node-version: '18.x'
       - name: Install dependencies
-        run: npm ci --include=dev
+        run: npm ci
       - name: Check prettier format
         run: npm run format-check
       - name: Check eslint
@@ -58,8 +58,10 @@ jobs:
           node-version: '18.x'
           cache: 'npm'
           registry-url: https://registry.npmjs.org/
-      - name: Install production dependencies
-        run: npm ci --omit=dev
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Typescript
+        run: npm run build
       - name: Publish package to npm
         run: npm publish
         env:
