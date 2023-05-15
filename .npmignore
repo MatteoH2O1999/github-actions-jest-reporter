@@ -5,3 +5,4 @@ tests
 jest.config.js
 .babelrc
 demos
+src

@@ -14,7 +14,7 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x, 19.x]
+        node-version: [14.x, 16.x, 18.x, 19.x, '20.x']
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: true
     runs-on: ${{ matrix.os }}
@@ -33,8 +33,25 @@ jobs:
         run: npm run test
         env:
           FORCE_COLOR: 3
+  lint_and_build:
+    runs-on: ubuntu-latest
+    name: Lint and build code
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+      - name: Install dependencies
+        run: npm ci --include=dev
+      - name: Check prettier format
+        run: npm run format-check
+      - name: Check eslint
+        run: npm run lint
+      - name: Build Typescript
+        run: npm run build
   codeql:
-    needs: test
     runs-on: ubuntu-latest
     name: CodeQL Analysis
     steps:

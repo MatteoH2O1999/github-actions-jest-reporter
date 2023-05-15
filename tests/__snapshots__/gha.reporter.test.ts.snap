@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporter interface onRunComplete 1`] = `
+"
+Summary
+Ran all test suites.
+"
+`;
+
+exports[`Reporter interface onTestResult last 1`] = `
+"::group::[1m[32m[7mPASS[27m[39m[22m test1.js (20 ms)
+  [32m✓[39m test1 (10 ms)
+::endgroup::
+
+::group::Errors thrown in test1.js
+Failure message
+::endgroup::
+
+"
+`;
+
+exports[`Reporter interface onTestResult not last 1`] = `
+"::group::[1m[32m[7mPASS[27m[39m[22m test1.js (20 ms)
+  [32m✓[39m test1 (10 ms)
+::endgroup::
+"
+`;
+
+exports[`Result tree output failed single test inside describe 1`] = `
+"  [1m[31m[7mFAIL[27m[39m[22m / (20 ms)
+    Test describe
+      [31m×[39m test (10 ms)
+"
+`;
+
+exports[`Result tree output failed single test without describe 1`] = `
+"  [1m[31m[7mFAIL[27m[39m[22m / (20 ms)
+    [31m×[39m test (10 ms)
+"
+`;
+
+exports[`Result tree output passed single test inside describe 1`] = `
+"::group::[1m[32m[7mPASS[27m[39m[22m / (20 ms)
+  Test describe
+    [32m✓[39m test (10 ms)
+::endgroup::
+"
+`;
+
+exports[`Result tree output passed single test without describe 1`] = `
+"::group::[1m[32m[7mPASS[27m[39m[22m / (20 ms)
+  [32m✓[39m test (10 ms)
+::endgroup::
+"
+`;
