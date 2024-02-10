@@ -18,7 +18,7 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x, 20.x]
+        node-version: [16.x, 18.x, 20.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
       fail-fast: true
     runs-on: ${{ matrix.os }}
@@ -45,7 +45,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '16.x'
       - name: Install dependencies
         run: npm ci
       - name: Check prettier format
