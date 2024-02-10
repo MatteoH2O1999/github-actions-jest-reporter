@@ -12,7 +12,7 @@ describe('NuxtLogo', () => {
       const wrapper = mount(NuxtLogo)
       expect(wrapper.vm).toBeTruthy()
     })
-    
+
     test('is not a Vue instance', () => {
       const wrapper = mount(NuxtLogo)
     })
@@ -23,10 +23,12 @@ describe('NuxtLogo', () => {
       const wrapper = mount(NuxtLogo)
       expect(wrapper.vm).toBeTruthy()
     })
-    
+
     test('is not a Vue instance', () => {
       const wrapper = mount(NuxtLogo)
     })
+
+    test.todo('TODO')
   })
 
   describe('NuxtLogo4', () => {
@@ -36,8 +38,8 @@ describe('NuxtLogo', () => {
         const wrapper = mount(NuxtLogo)
         expect(wrapper.vm).toBeTruthy()
       })
-      
-      test('is not a Vue instance', () => {
+
+      test.skip('is not a Vue instance', () => {
         const wrapper = mount(NuxtLogo)
       })
     })
