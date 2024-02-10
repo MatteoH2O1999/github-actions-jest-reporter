@@ -3,6 +3,7 @@ import * as reporters from '@jest/reporters';
 import {
   AggregatedResult,
   AssertionResult,
+  Status,
   Test,
   TestContext,
   TestResult
@@ -16,6 +17,13 @@ import {
   test
 } from '@jest/globals';
 import GhaReporter from '../src';
+
+function normalizeIcons(str: string): string {
+  if (!str) {
+    return str;
+  }
+  return str.replace(/\u00D7/gu, '\u2715').replace(/\u221A/gu, '\u2713');
+}
 
 jest.mock('@actions/core');
 const mockedCore = jest.mocked(core);
@@ -41,7 +49,7 @@ describe('Result tree generation', () => {
 
   beforeAll(() => {
     mockedCore.info.mockImplementation(message => {
-      consoleLog = consoleLog.concat(message, '\n');
+      consoleLog = consoleLog.concat(normalizeIcons(message), '\n');
     });
   });
 
@@ -57,12 +65,12 @@ describe('Result tree generation', () => {
         status: 'failed',
         title: 'test'
       }
-    ];
+    ] as unknown as Array<AssertionResult>;
     const suitePerf = {
-      end: 1,
+      end: 30,
       runtime: 20,
       slow: false,
-      start: 0
+      start: 10
     };
     const expectedResults = {
       children: [
@@ -70,25 +78,21 @@ describe('Result tree generation', () => {
           children: [],
           duration: 10,
           name: 'test',
-          passed: false
+          status: 'failed'
         }
       ],
       name: '/',
       passed: false,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
 
-    const generated = gha['getResultTree'](
-      testResults as unknown as AssertionResult[],
-      '/',
-      suitePerf
-    );
+    const generated = gha['getResultTree'](testResults, '/', suitePerf);
 
     expect(consoleLog).toBe('');
     expect(generated).toEqual(expectedResults);
@@ -102,12 +106,12 @@ describe('Result tree generation', () => {
         status: 'passed',
         title: 'test'
       }
-    ];
+    ] as unknown as Array<AssertionResult>;
     const suitePerf = {
-      end: 1,
+      end: 30,
       runtime: 20,
       slow: false,
-      start: 0
+      start: 10
     };
     const expectedResults = {
       children: [
@@ -115,25 +119,21 @@ describe('Result tree generation', () => {
           children: [],
           duration: 10,
           name: 'test',
-          passed: true
+          status: 'passed'
         }
       ],
       name: '/',
       passed: true,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
 
-    const generated = gha['getResultTree'](
-      testResults as unknown as AssertionResult[],
-      '/',
-      suitePerf
-    );
+    const generated = gha['getResultTree'](testResults, '/', suitePerf);
 
     expect(consoleLog).toBe('');
     expect(generated).toEqual(expectedResults);
@@ -147,12 +147,12 @@ describe('Result tree generation', () => {
         status: 'failed',
         title: 'test'
       }
-    ];
+    ] as unknown as Array<AssertionResult>;
     const suitePerf = {
-      end: 1,
+      end: 30,
       runtime: 20,
       slow: false,
-      start: 0
+      start: 10
     };
     const expectedResults = {
       children: [
@@ -162,7 +162,7 @@ describe('Result tree generation', () => {
               children: [],
               duration: 10,
               name: 'test',
-              passed: false
+              status: 'failed'
             }
           ],
           name: 'Test describe',
@@ -172,19 +172,15 @@ describe('Result tree generation', () => {
       name: '/',
       passed: false,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
 
-    const generated = gha['getResultTree'](
-      testResults as unknown as AssertionResult[],
-      '/',
-      suitePerf
-    );
+    const generated = gha['getResultTree'](testResults, '/', suitePerf);
 
     expect(consoleLog).toBe('');
     expect(generated).toEqual(expectedResults);
@@ -198,12 +194,12 @@ describe('Result tree generation', () => {
         status: 'passed',
         title: 'test'
       }
-    ];
+    ] as unknown as Array<AssertionResult>;
     const suitePerf = {
-      end: 1,
+      end: 30,
       runtime: 20,
       slow: false,
-      start: 0
+      start: 10
     };
     const expectedResults = {
       children: [
@@ -213,7 +209,7 @@ describe('Result tree generation', () => {
               children: [],
               duration: 10,
               name: 'test',
-              passed: true
+              status: 'passed'
             }
           ],
           name: 'Test describe',
@@ -223,19 +219,74 @@ describe('Result tree generation', () => {
       name: '/',
       passed: true,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
 
-    const generated = gha['getResultTree'](
-      testResults as unknown as AssertionResult[],
-      '/',
-      suitePerf
-    );
+    const generated = gha['getResultTree'](testResults, '/', suitePerf);
+
+    expect(consoleLog).toBe('');
+    expect(generated).toEqual(expectedResults);
+  });
+
+  test('skipped single test and todo single test inside describe', () => {
+    const testResults = [
+      {
+        ancestorTitles: ['Test describe'],
+        duration: 10,
+        status: 'skipped',
+        title: 'test'
+      },
+      {
+        ancestorTitles: ['Test describe'],
+        duration: 14,
+        status: 'todo',
+        title: 'test2'
+      }
+    ] as unknown as Array<AssertionResult>;
+    const suitePerf = {
+      end: 30,
+      runtime: 20,
+      slow: false,
+      start: 10
+    };
+    const expectedResults = {
+      children: [
+        {
+          children: [
+            {
+              children: [],
+              duration: 10,
+              name: 'test',
+              status: 'skipped'
+            },
+            {
+              children: [],
+              duration: 14,
+              name: 'test2',
+              status: 'todo'
+            }
+          ],
+          name: 'Test describe',
+          passed: true
+        }
+      ],
+      name: '/',
+      passed: true,
+      performanceInfo: {
+        end: 30,
+        runtime: 20,
+        slow: false,
+        start: 10
+      }
+    };
+    const gha = new GhaReporter();
+
+    const generated = gha['getResultTree'](testResults, '/', suitePerf);
 
     expect(consoleLog).toBe('');
     expect(generated).toEqual(expectedResults);
@@ -247,7 +298,7 @@ describe('Result tree output', () => {
 
   beforeAll(() => {
     mockedCore.info.mockImplementation(message => {
-      consoleLog = consoleLog.concat(message, '\n');
+      consoleLog = consoleLog.concat(normalizeIcons(message), '\n');
     });
   });
 
@@ -262,16 +313,16 @@ describe('Result tree output', () => {
           children: [],
           duration: 10,
           name: 'test',
-          passed: false
+          status: 'failed' as Status
         }
       ],
       name: '/',
       passed: false,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
@@ -288,16 +339,16 @@ describe('Result tree output', () => {
           children: [],
           duration: 10,
           name: 'test',
-          passed: true
+          status: 'passed' as Status
         }
       ],
       name: '/',
       passed: true,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
@@ -316,7 +367,7 @@ describe('Result tree output', () => {
               children: [],
               duration: 10,
               name: 'test',
-              passed: false
+              status: 'failed' as Status
             }
           ],
           name: 'Test describe',
@@ -326,10 +377,10 @@ describe('Result tree output', () => {
       name: '/',
       passed: false,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
       }
     };
     const gha = new GhaReporter();
@@ -348,7 +399,7 @@ describe('Result tree output', () => {
               children: [],
               duration: 10,
               name: 'test',
-              passed: true
+              status: 'passed' as Status
             }
           ],
           name: 'Test describe',
@@ -358,10 +409,74 @@ describe('Result tree output', () => {
       name: '/',
       passed: true,
       performanceInfo: {
-        end: 1,
+        end: 30,
         runtime: 20,
         slow: false,
-        start: 0
+        start: 10
+      }
+    };
+    const gha = new GhaReporter();
+
+    gha['printResultTree'](generatedTree);
+
+    expect(consoleLog).toMatchSnapshot();
+  });
+
+  test('todo single test inside describe', () => {
+    const generatedTree = {
+      children: [
+        {
+          children: [
+            {
+              children: [],
+              duration: 10,
+              name: 'test',
+              status: 'todo' as Status
+            }
+          ],
+          name: 'Test describe',
+          passed: true
+        }
+      ],
+      name: '/',
+      passed: true,
+      performanceInfo: {
+        end: 30,
+        runtime: 20,
+        slow: false,
+        start: 10
+      }
+    };
+    const gha = new GhaReporter();
+
+    gha['printResultTree'](generatedTree);
+
+    expect(consoleLog).toMatchSnapshot();
+  });
+
+  test('skipped single test inside describe', () => {
+    const generatedTree = {
+      children: [
+        {
+          children: [
+            {
+              children: [],
+              duration: 10,
+              name: 'test',
+              status: 'skipped' as Status
+            }
+          ],
+          name: 'Test describe',
+          passed: true
+        }
+      ],
+      name: '/',
+      passed: true,
+      performanceInfo: {
+        end: 30,
+        runtime: 20,
+        slow: false,
+        start: 10
       }
     };
     const gha = new GhaReporter();
@@ -377,7 +492,7 @@ describe('Reporter interface', () => {
 
   beforeAll(() => {
     mockedCore.info.mockImplementation(message => {
-      consoleLog = consoleLog.concat(message, '\n');
+      consoleLog = consoleLog.concat(normalizeIcons(message), '\n');
     });
   });
 
@@ -408,10 +523,8 @@ describe('Reporter interface', () => {
     };
     const mockTestResult = {
       perfStats: {
-        end: 1,
         runtime: 20,
-        slow: false,
-        start: 0
+        slow: false
       },
       testFilePath: '/testDir/test1.js',
       testResults: [
@@ -431,9 +544,9 @@ describe('Reporter interface', () => {
     const gha = new GhaReporter();
 
     gha.onTestResult(
-      mockTest as unknown as Test,
+      mockTest as Test,
       mockTestResult as unknown as TestResult,
-      mockResults as unknown as AggregatedResult
+      mockResults as AggregatedResult
     );
 
     expect(consoleLog).toMatchSnapshot();
@@ -450,10 +563,8 @@ describe('Reporter interface', () => {
     const mockTestResult = {
       failureMessage: 'Failure message',
       perfStats: {
-        end: 1,
         runtime: 20,
-        slow: false,
-        start: 0
+        slow: false
       },
       testFilePath: '/testDir/test1.js',
       testResults: [
@@ -474,7 +585,7 @@ describe('Reporter interface', () => {
     const gha = new GhaReporter();
 
     gha.onTestResult(
-      mockTest as unknown as Test,
+      mockTest as Test,
       mockTestResult as unknown as TestResult,
       mockResults as unknown as AggregatedResult
     );

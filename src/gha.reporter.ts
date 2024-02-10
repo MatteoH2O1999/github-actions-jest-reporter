@@ -3,31 +3,15 @@ import * as reporters from '@jest/reporters';
 import {
   AggregatedResult,
   AssertionResult,
+  Status,
   Test,
   TestContext,
   TestResult
 } from '@jest/test-result';
 import chalk from 'chalk';
+import {specialChars} from 'jest-util';
 
-type ResultTree = {
-  name: string;
-  passed: boolean;
-  performanceInfo: PerformanceInfo;
-  children: (ResultTreeNode | ResultTreeLeaf)[];
-};
-
-type ResultTreeNode = {
-  name: string;
-  passed: boolean;
-  children: (ResultTreeNode | ResultTreeLeaf)[];
-};
-
-type ResultTreeLeaf = {
-  name: string;
-  passed: boolean;
-  duration: number;
-  children: never[];
-};
+const ICONS = specialChars.ICONS;
 
 type PerformanceInfo = {
   end: number;
@@ -36,6 +20,25 @@ type PerformanceInfo = {
   start: number;
 };
 
+type ResultTreeLeaf = {
+  name: string;
+  status: Status;
+  duration: number;
+  children: Array<never>;
+};
+
+type ResultTreeNode = {
+  name: string;
+  passed: boolean;
+  children: Array<ResultTreeNode | ResultTreeLeaf>;
+};
+
+type ResultTree = {
+  children: Array<ResultTreeLeaf | ResultTreeNode>;
+  name: string;
+  passed: boolean;
+  performanceInfo: PerformanceInfo;
+};
 export default class GithubActionsReporter extends reporters.BaseReporter {
   override onTestResult(
     test: Test,
@@ -44,10 +47,7 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
   ): void {
     this.printFullResult(test.context, testResult);
     if (this.isLastTestSuite(results)) {
-      core.info('');
-      if (this.printFailedTestLogs(test, results)) {
-        core.info('');
-      }
+      this.printFailedTestLogs(test, results);
     }
   }
 
@@ -71,9 +71,9 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
     testContexts: Set<TestContext>,
     results: AggregatedResult
   ): void {
-    core.info('');
-    core.info(reporters.utils.getSummary(results));
-    core.info('Ran all test suites.');
+    this.log('');
+    this.log(reporters.utils.getSummary(results));
+    this.log('Ran all test suites.');
   }
 
   private printFullResult(context: TestContext, results: TestResult): void {
@@ -89,12 +89,11 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private arrayEqual(a1: any[], a2: any[]): boolean {
+  private arrayEqual(a1: Array<any>, a2: Array<any>): boolean {
     if (a1.length !== a2.length) {
       return false;
     }
-    for (let index = 0; index < a1.length; index++) {
-      const element = a1[index];
+    for (const [index, element] of a1.entries()) {
       if (element !== a2[index]) {
         return false;
       }
@@ -103,12 +102,11 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private arrayChild(a1: any[], a2: any[]): boolean {
+  private arrayChild(a1: Array<any>, a2: Array<any>): boolean {
     if (a1.length - a2.length !== 1) {
       return false;
     }
-    for (let index = 0; index < a2.length; index++) {
-      const element = a2[index];
+    for (const [index, element] of a2.entries()) {
       if (element !== a1[index]) {
         return false;
       }
@@ -117,7 +115,7 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
   }
 
   private getResultTree(
-    suiteResult: AssertionResult[],
+    suiteResult: Array<AssertionResult>,
     testPath: string,
     suitePerf: PerformanceInfo
   ): ResultTree {
@@ -127,23 +125,18 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
       passed: true,
       performanceInfo: suitePerf
     };
-    const branches: string[][] = [];
+    const branches: Array<Array<string>> = [];
     for (const element of suiteResult) {
       if (element.ancestorTitles.length === 0) {
-        let passed = true;
         if (element.status === 'failed') {
           root.passed = false;
-          passed = false;
-        } else if (element.status !== 'passed') {
-          throw new Error(
-            `Expected status to be 'failed' or 'passed', got ${element.status}`
-          );
         }
+        const duration = element.duration || 1;
         root.children.push({
           children: [],
-          duration: Math.max(element.duration || 0, 1),
+          duration,
           name: element.title,
-          passed
+          status: element.status
         });
       } else {
         let alreadyInserted = false;
@@ -169,27 +162,29 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
   }
 
   private getResultChildren(
-    suiteResult: AssertionResult[],
-    ancestors: string[]
-  ): ResultTreeNode | ResultTreeLeaf {
-    const node: ResultTreeNode | ResultTreeLeaf = {
+    suiteResult: Array<AssertionResult>,
+    ancestors: Array<string>
+  ): ResultTreeNode {
+    const node: ResultTreeNode = {
       children: [],
-      name: ancestors[ancestors.length - 1],
+      name: ancestors.at(-1) || '',
       passed: true
     };
-    const branches: string[][] = [];
+    const branches: Array<Array<string>> = [];
     for (const element of suiteResult) {
-      let passed = true;
+      let duration = element.duration;
+      if (!duration || Number.isNaN(duration)) {
+        duration = 1;
+      }
       if (this.arrayEqual(element.ancestorTitles, ancestors)) {
         if (element.status === 'failed') {
           node.passed = false;
-          passed = false;
         }
         node.children.push({
           children: [],
-          duration: Math.max(element.duration || 0, 1),
+          duration,
           name: element.title,
-          passed
+          status: element.status
         });
       } else if (
         this.arrayChild(
@@ -234,15 +229,15 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
       perfMs = ` (${resultTree.performanceInfo.runtime} ms)`;
     }
     if (resultTree.passed) {
-      core.startGroup(
+      this.startGroup(
         `${chalk.bold.green.inverse('PASS')} ${resultTree.name}${perfMs}`
       );
       for (const child of resultTree.children) {
         this.recursivePrintResultTree(child, true, 1);
       }
-      core.endGroup();
+      this.endGroup();
     } else {
-      core.info(
+      this.log(
         `  ${chalk.bold.red.inverse('FAIL')} ${resultTree.name}${perfMs}`
       );
       for (const child of resultTree.children) {
@@ -257,37 +252,53 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
     depth: number
   ): void {
     if (resultTree.children.length === 0) {
-      const leaf = resultTree as ResultTreeLeaf;
+      if (!('duration' in resultTree)) {
+        throw new Error('Expected a leaf. Got a node.');
+      }
       let numberSpaces = depth;
       if (!alreadyGrouped) {
         numberSpaces++;
       }
       const spaces = '  '.repeat(numberSpaces);
       let resultSymbol;
-      if (leaf.passed) {
-        resultSymbol = chalk.green('\u2713');
-      } else {
-        resultSymbol = chalk.red('\u00D7');
+      switch (resultTree.status) {
+        case 'passed':
+          resultSymbol = chalk.green(ICONS.success);
+          break;
+        case 'failed':
+          resultSymbol = chalk.red(ICONS.failed);
+          break;
+        case 'todo':
+          resultSymbol = chalk.magenta(ICONS.todo);
+          break;
+        case 'pending':
+        case 'skipped':
+          resultSymbol = chalk.yellow(ICONS.pending);
+          break;
       }
-      core.info(`${spaces + resultSymbol} ${leaf.name} (${leaf.duration} ms)`);
+      this.log(
+        `${spaces}${resultSymbol} ${resultTree.name} (${resultTree.duration} ms)`
+      );
     } else {
-      const node = resultTree as ResultTreeNode;
-      if (node.passed) {
+      if (!('passed' in resultTree)) {
+        throw new Error('Expected a node. Got a leaf');
+      }
+      if (resultTree.passed) {
         if (alreadyGrouped) {
-          core.info('  '.repeat(depth) + node.name);
-          for (const child of node.children) {
+          this.log('  '.repeat(depth) + resultTree.name);
+          for (const child of resultTree.children) {
             this.recursivePrintResultTree(child, true, depth + 1);
           }
         } else {
-          core.startGroup('  '.repeat(depth) + node.name);
-          for (const child of node.children) {
+          this.startGroup('  '.repeat(depth) + resultTree.name);
+          for (const child of resultTree.children) {
             this.recursivePrintResultTree(child, true, depth + 1);
           }
-          core.endGroup();
+          this.endGroup();
         }
       } else {
-        core.info('  '.repeat(depth + 1) + node.name);
-        for (const child of node.children) {
+        this.log('  '.repeat(depth + 1) + resultTree.name);
+        for (const child of resultTree.children) {
           this.recursivePrintResultTree(child, false, depth + 1);
         }
       }
@@ -306,12 +317,27 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
       testDir = testDir.replace(rootDir, '');
       testDir = testDir.slice(1, testDir.length);
       if (result.failureMessage) {
-        written = true;
-        core.startGroup(`Errors thrown in ${testDir}`);
-        core.info(result.failureMessage);
-        core.endGroup();
+        if (!written) {
+          this.log('');
+          written = true;
+        }
+        this.startGroup(`Errors thrown in ${testDir}`);
+        this.log(result.failureMessage);
+        this.endGroup();
       }
     }
     return written;
+  }
+
+  override log(message: string): void {
+    core.info(message);
+  }
+
+  private startGroup(title: string): void {
+    core.startGroup(title);
+  }
+
+  private endGroup(): void {
+    core.endGroup();
   }
 }
