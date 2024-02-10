@@ -17,7 +17,7 @@
       "@typescript-eslint/no-shadow": "error",
       "@typescript-eslint/explicit-member-accessibility": ["error", {"accessibility": "no-public"}],
       "@typescript-eslint/no-require-imports": "error",
-      "@typescript-eslint/array-type": "error",
+      "@typescript-eslint/array-type": ["error", {"default": "generic"}],
       "@typescript-eslint/await-thenable": "error",
       "@typescript-eslint/ban-ts-comment": "error",
       "camelcase": "off",
