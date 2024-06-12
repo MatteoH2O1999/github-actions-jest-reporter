@@ -1,11 +1,11 @@
 {
   "name": "@matteoh2o1999/github-actions-jest-reporter",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "A Github Actions reporter for Jest supporting log folding",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "keywords": [
     "jest",

@@ -7,7 +7,7 @@ on:
         required: true
         type: string
         description: Node version to use
-        default: '16.x'
+        default: '18.x'
 
 jobs:
   test_run:
