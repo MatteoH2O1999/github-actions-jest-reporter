@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Setup node ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -42,6 +44,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Setup node
         uses: actions/setup-node@v4
         with:
@@ -60,6 +64,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Remove internal test repo
         run: rm -rf test_repo
       - name: Initialize CodeQL
