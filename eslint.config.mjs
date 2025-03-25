@@ -3,32 +3,15 @@ import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import stylisticTypescript from '@stylistic/eslint-plugin-ts';
 import globals from 'globals';
 import tsParser from '@typescript-eslint/parser';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-import js from '@eslint/js';
-import {FlatCompat} from '@eslint/eslintrc';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
-});
-
-const gen = {
-  files: ["src/*.ts"],
-  ignores: ["node_modules/", "test_repo/"],
-}
+import github from 'eslint-plugin-github';
 
 export default [
-  ...compat.extends('plugin:github/recommended').map(config => ({...gen, ...config})),
+  github.getFlatConfigs().recommended,
   {
-    ...gen,
     plugins: {
       jest,
       '@typescript-eslint': typescriptEslint,
-      '@typescript-eslint-stylistic': stylisticTypescript,
+      '@typescript-eslint-stylistic': stylisticTypescript
     },
 
     languageOptions: {
@@ -113,7 +96,13 @@ export default [
       'sort-imports': 'error',
       'sort-keys': 'error',
       'no-return-await': 'off',
-      'filenames/match-regex': 'off'
+      'github/filenames-match-regex': 'off'
     }
+  },
+  {
+    ignores: ['test_repo/', '**/*.{mjs,js}', 'lib/']
+  },
+  {
+    files: ['**/*.ts']
   }
 ];
