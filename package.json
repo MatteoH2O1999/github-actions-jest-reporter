@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.24.4",
     "@stylistic/eslint-plugin-ts": "^4.0.1",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.1",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.15.0",
     "eslint-plugin-github": "^6.0.0",
