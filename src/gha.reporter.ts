@@ -167,7 +167,7 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
   ): ResultTreeNode {
     const node: ResultTreeNode = {
       children: [],
-      name: ancestors.at(-1) || '',
+      name: ancestors[ancestors.length - 1] || '',
       passed: true
     };
     const branches: Array<Array<string>> = [];
