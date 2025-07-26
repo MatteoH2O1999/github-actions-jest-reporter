@@ -19,7 +19,7 @@
     "test": "jest",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint .",
+    "lint": "eslint . --debug",
     "build": "tsc --build",
     "integration-base": "cd test_repo && cd test-app && npm run test",
     "integration-new": "cd test_repo && cd test-app && npm run test-reporter"
@@ -42,12 +42,13 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.24.4",
-    "@stylistic/eslint-plugin-ts": "^4.0.1",
+    "@stylistic/eslint-plugin": "^4.0.1",
     "@types/node": "^24.1.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.15.0",
     "eslint-plugin-github": "^6.0.0",
     "eslint-plugin-jest": "^29.0.1",
+    "globals": "^16.3.0",
     "js-yaml": "^4.1.0",
     "prettier": "^3.2.5",
     "ts-jest": "^29.1.2",
