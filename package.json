@@ -19,7 +19,7 @@
     "test": "jest",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint . --debug",
+    "lint": "eslint .",
     "build": "tsc --build",
     "integration-base": "cd test_repo && cd test-app && npm run test",
     "integration-new": "cd test_repo && cd test-app && npm run test-reporter"
