@@ -16,7 +16,7 @@ jobs:
     name: Test node ${{ matrix.node-version }} on ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Setup node ${{ matrix.node-version }}
@@ -34,7 +34,7 @@ jobs:
     name: Lint and build code
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Setup node
@@ -55,7 +55,7 @@ jobs:
     name: Build and release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
       - name: Setup node
