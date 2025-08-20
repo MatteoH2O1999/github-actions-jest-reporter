@@ -85,6 +85,12 @@ export default class GithubActionsReporter extends reporters.BaseReporter {
       testDir,
       results.perfStats
     );
+    if (resultTree.children.length === 0) {
+      if (results.failureMessage == null) {
+        throw new Error('Expected a suite that failed to run');
+      }
+      resultTree.passed = false;
+    }
     this.printResultTree(resultTree);
   }
 
