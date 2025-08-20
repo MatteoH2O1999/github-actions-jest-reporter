@@ -8,8 +8,10 @@ import {
   TestContext,
   TestResult
 } from '@jest/test-result';
-import chalk from 'chalk';
+import {Instance} from 'chalk';
 import {specialChars} from 'jest-util';
+
+const chalk = new Instance({level: 3});
 
 const ICONS = specialChars.ICONS;
 
@@ -39,6 +41,7 @@ type ResultTree = {
   passed: boolean;
   performanceInfo: PerformanceInfo;
 };
+
 export default class GithubActionsReporter extends reporters.BaseReporter {
   override onTestResult(
     test: Test,
