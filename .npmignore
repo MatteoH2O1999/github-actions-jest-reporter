@@ -13,3 +13,5 @@ jest.config.js
 .babelrc
 demos
 src
+tsconfig.tsbuildinfo
+eslint.config.mjs
