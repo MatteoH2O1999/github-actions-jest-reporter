@@ -35,7 +35,7 @@
   },
   "homepage": "https://github.com/MatteoH2O1999/github-actions-jest-reporter#readme",
   "dependencies": {
-    "@actions/core": "^2.0.1",
+    "@actions/core": "^3.0.0",
     "chalk": "^4.0.0",
     "jest": "^30.0.5",
     "jest-util": "^30.0.0"
